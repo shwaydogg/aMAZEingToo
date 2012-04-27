@@ -1,0 +1,92 @@
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>hello-backbonejs</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>  <script type="text/javascript" src="node_modules/backbone/node_modules/underscore/underscore.js"></script>
+  <script type="text/javascript" src="node_modules/backbone/backbone.js"></script>
+  <script type="text/javascript" src="node_modules/mustache/mustache.js"></script>
+  </head>
+  <body>
+<div class="left">
+<div id="gameNotifications"></div>
+<div id="gameContainer"></div>
+<div class="right">
+  <div id="scoreBoard"></div>
+  <div id="gameButtons"></div>
+</div>
+
+
+ <form method="post" action="/">
+     <input type="text" name="name1" />
+     <input type="text" name="name2" />
+     <input type="submit" value="Submit" />
+ </form>
+
+
+    <div id='canContainer'></div>
+    <div id='canToo'></div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+    <script src="./canvas.js"></script>
+    <script src="./mouseTracks.js"></script>
+    <script src="./models.js"></script>
+
+<!-- 
+     <script src="/socket.io/socket.io.js"></script>
+     <script>
+       var socket = io.connect('http://localhost');
+       socket.on('news', function (data) {
+         console.log(data);
+         socket.emit('my other event', { my: 'data' });
+       });
+     </script>
+ -->
+    <script type="text/javascript">
+
+    var can = new Canvas(500,500);
+    can.addToDom('canContainer');
+    can.drawLine(10,10,400,400,10);
+    can.drawLine(300,10,200,450,'red');
+    can.drawLine(100,10,10,100,'violet',40);
+    can.addToDom('canContainer');
+
+
+    var canToo = new Canvas(1000,1000);
+    canToo.addToDom('canToo');
+    canToo.drawLine(0,0,1000,0);
+    canToo.drawLine(0,0,0,1000);
+    canToo.drawLine(1000,0,1000,1000);
+    canToo.drawLine(0,1000,1000,1000);
+
+    tracker = new MouseTracks('canContainer');
+    trackerToo = new MouseTracks('canToo');
+
+    reporterFunction = function(line){
+        console.log('aLine:',line);
+        can.drawLine(line.x1,line.y1,line.x2,line.y2);
+    };
+
+    reporterFunctionToo = function(line){
+        console.log('bLine:',line);
+        canToo.drawLine(line.x1,line.y1,line.x2,line.y2);
+    };
+
+
+    var game  = new Game({playerType: "mazeMaker",player1UserName:'greg',player2UserName:"Scott"});
+    var gameView = new GameView({model:game});
+    gameView.render();
+
+    var notificationView = new NotificationView({model:game, el:"#gameNotifications"});
+    notificationView.render();
+
+
+    var deInit = tracker.initMode("dragOnClick",reporterFunction);
+    var deInitoo = trackerToo.initMode("line",reporterFunctionToo);
+
+
+
+
+    </script>
+  </body>
+  </html>
