@@ -36,8 +36,7 @@ function MouseTracks (el){
 
 MouseTracks.prototype.onUp = function (e){
     if(this.prev)
-            console.log(this.reporterFunction);
-
+        this.offSet = findPos(this.el) ;
         this.reporterFunction({  x1:this.prev.x - this.offSet.x,
                             y1:this.prev.y - this.offSet.y,
                             x2:e.pageX - this.offSet.x,
@@ -64,7 +63,7 @@ MouseTracks.prototype.onDrag = function(e){
         this.prev = {x:e.pageX, y:e.pageY};
         return;
     }
-        console.log(this.reporterFunction);
+    this.offSet = findPos(this.el) ;
 
     this.reporterFunction({  x1:this.prev.x - this.offSet.x,
                         y1:this.prev.y - this.offSet.y,
@@ -96,8 +95,6 @@ MouseTracks.prototype.initMode = function (mode, reporterFunction){
     var thisMouseTrack = this;
     this.mode = mode;
     this.reporterFunction = reporterFunction;
-
-    console.log(this.reporterFunction);
 
     if(mode=='drag'){
         addEvent(thisMouseTrack.el , 'mousemove', thisMouseTrack.onDragFun);

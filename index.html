@@ -6,22 +6,28 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>  <script type="text/javascript" src="node_modules/backbone/node_modules/underscore/underscore.js"></script>
   <script type="text/javascript" src="node_modules/backbone/backbone.js"></script>
   <script type="text/javascript" src="node_modules/mustache/mustache.js"></script>
+  <link rel="stylesheet" type="text/css" href="main.css" media="all">
   </head>
   <body>
-<div class="left">
-<div id="gameNotifications"></div>
-<div id="gameContainer"></div>
-<div class="right">
-  <div id="scoreBoard"></div>
-  <div id="gameButtons"></div>
-</div>
+    <div id="mainContainer" class="clearfix">
+      <div class="left clearfix">
+        <div id="gameNotifications"></div>
+      </div>
+
+      <div id="gameContainer" class="clearfix"></div>
+
+      <div class="right clearfix">
+        <div id="gameScoreBoard"></div>
+        <div id="gameButtons"></div>
+      </div>
+    </div>
 
 
  <form method="post" action="/">
      <input type="text" name="name1" />
      <input type="text" name="name2" />
      <input type="submit" value="Submit" />
- </form>
+ </form>        
 
 
     <div id='canContainer'></div>
@@ -42,49 +48,22 @@
        });
      </script>
  -->
+
     <script type="text/javascript">
 
-    var can = new Canvas(500,500);
-    can.addToDom('canContainer');
-    can.drawLine(10,10,400,400,10);
-    can.drawLine(300,10,200,450,'red');
-    can.drawLine(100,10,10,100,'violet',40);
-    can.addToDom('canContainer');
-
-
-    var canToo = new Canvas(1000,1000);
-    canToo.addToDom('canToo');
-    canToo.drawLine(0,0,1000,0);
-    canToo.drawLine(0,0,0,1000);
-    canToo.drawLine(1000,0,1000,1000);
-    canToo.drawLine(0,1000,1000,1000);
-
-    tracker = new MouseTracks('canContainer');
-    trackerToo = new MouseTracks('canToo');
-
-    reporterFunction = function(line){
-        console.log('aLine:',line);
-        can.drawLine(line.x1,line.y1,line.x2,line.y2);
-    };
-
-    reporterFunctionToo = function(line){
-        console.log('bLine:',line);
-        canToo.drawLine(line.x1,line.y1,line.x2,line.y2);
-    };
-
-
-    var game  = new Game({playerType: "mazeMaker",player1UserName:'greg',player2UserName:"Scott"});
+    var game  = new Game({playerType: "mazeMaker",player1UserName:'greg',player2UserName:"Scott", player1Points: 0, player2Points: 0, playerType:'pathFinder'});
     var gameView = new GameView({model:game});
     gameView.render();
 
     var notificationView = new NotificationView({model:game, el:"#gameNotifications"});
+    var scoreBoardView = new ScoreBoardView({model:game, el:"#gameScoreBoard"});
+    var buttonview = new ButtonView({model:game, el:'#gameButtons'});
+
     notificationView.render();
 
-
-    var deInit = tracker.initMode("dragOnClick",reporterFunction);
-    var deInitoo = trackerToo.initMode("line",reporterFunctionToo);
-
-
+    setTimeout(function(){
+      game.set({player1UserName:'Mustachio', player1Points: 9999999, playerType:"mazeMaker"});
+    },3000);
 
 
     </script>
