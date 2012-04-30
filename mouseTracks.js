@@ -89,7 +89,6 @@ MouseTracks.prototype.initFunctions = function (){
 };
 
 MouseTracks.prototype.initMode = function (mode, reporterFunction){
-    this.offSet = findPos(this.el) ;
     this.initFunctions();
     this.prev = null;
     var thisMouseTrack = this;

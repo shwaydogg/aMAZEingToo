@@ -13,7 +13,7 @@ Canvas.prototype.addToDom = function(id){
 Canvas.prototype.drawLine = function (x1,y1,x2,y2,color,radius){
     if (typeof color == "number"){
         radius = color;
-        color = null; 
+        color = null;
     }
     if (this.el.getContext){
         var ctx = this.el.getContext('2d');
