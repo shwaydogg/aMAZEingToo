@@ -2,7 +2,7 @@
 
 function setUp(app){
     console.log("setUp express running");
-    var files  = "mouseTracks.js canvas.js index.html main.css models.js node_modules/backbone/backbone.js node_modules/mustache/mustache.js node_modules/backbone/node_modules/underscore/underscore.js";
+    var files  = "backbone/router.js backbone/login.js backbone/game.js mouseTracks.js canvas.js index.html main.css models.js node_modules/backbone/backbone.js node_modules/mustache/mustache.js node_modules/backbone/node_modules/underscore/underscore.js";
     var toServe = files.split(' ');
 
     for(var i in toServe){

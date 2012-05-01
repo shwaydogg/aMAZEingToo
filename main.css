@@ -19,6 +19,12 @@ button#giveUp {
 	background-color:red;
 }
 
+.opponentName {
+	font-weight:800;
+}
+
+
+
 .clearfix:after {
 	content: ".";
 	display: block;

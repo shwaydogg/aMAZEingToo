@@ -17,22 +17,15 @@ usersFuncs= users.run();
 setExpress.setUp(app);
 
 
-
 io.sockets.on('connection', function (socket) {
-    socket.emit('news', { hello: 'world' });
-    socket.on('my other event', function (data) {
-        console.log(data);
-    });
-
-
 
     socket.on('login', function(msgData){
         console.log("msgData",msgData);
-        var status = usersFuncs.login(msgData, function(status){
-            console.log(status);
+        usersFuncs.login(msgData, socket, function(status){
             if(status.success && status.newAccount){
                 socket.emit("newAccount");
-            } else if( status.success){
+            } else if(status.success){
+                socket.user = msgData.user;
                 socket.emit("loggedIn");
             }else{
                 socket.emit("badPassword");
@@ -40,7 +33,16 @@ io.sockets.on('connection', function (socket) {
         });
     });
 
+    socket.on('getWaitingRoom', function(user){
+        usersFuncs.sendWaitingRoom(user);
+    });
 
+    socket.on('challenge', function(user){
+        console.log('the doomed:',user);
+    });
 
-
+    socket.on('joinWaitingRoom', function(){
+        usersFuncs.joinWaitingRoom(socket.user);
+        console.log('socket.user', socket.user);
+    });
 });
