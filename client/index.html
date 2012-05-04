@@ -3,10 +3,11 @@
     <head>
         <meta charset="utf-8">
         <title>hello-backbonejs</title>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>  <script type="text/javascript" src="node_modules/backbone/node_modules/underscore/underscore.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script type="text/javascript" src="node_modules/backbone/node_modules/underscore/underscore.js"></script>
         <script type="text/javascript" src="node_modules/backbone/backbone.js"></script>
         <script type="text/javascript" src="node_modules/mustache/mustache.js"></script>
-        <link rel="stylesheet" type="text/css" href="main.css" media="all">
+        <link rel="stylesheet" type="text/css" href="client/main.css" media="all">
     </head>
     <body>
         <div id="main" class="clearfix"></div>
@@ -52,16 +53,16 @@
         </script>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
-        <script src="./canvas.js"></script>
-        <script src="./mouseTracks.js"></script>
+        <script src="client/canvas.js"></script>
+        <script src="client/mouseTracks.js"></script>
 
          <script src="/socket.io/socket.io.js"></script>
          <script>
-            var socket = io.connect(); //to keep local use: io.connect('http://localhost');
+            var socket = io.connect(); //to keep local use: io.connect('http://localhost'); // var socket = io.connect({secure:true}); for secure conneciton when ssl is esablished
          </script>
 
-        <script src="backbone/game.js"></script>
-        <script src="backbone/login.js"></script>
-        <script src="backbone/router.js"></script>
+        <script src="client/backbone/game.js"></script>
+        <script src="client/backbone/login.js"></script>
+        <script src="client/backbone/router.js"></script>
     </body>
 </html>

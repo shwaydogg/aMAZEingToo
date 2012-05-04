@@ -1,5 +1,5 @@
 var users = require('./users');
-var setExpress = require('./setExpress');
+var setExpress = require('./server/setExpress');
 
 
 var io = require('socket.io'),
