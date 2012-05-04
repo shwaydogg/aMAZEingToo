@@ -12,12 +12,12 @@ function run(){
 
     User = function (userData, socket){
         this.socket = socket;
-        this.user = userData.user;
+        this.username = userData.username;
         this.wins = userData.wins;
         this.losses = userData.losses;
         this.points = userData.points;
         this.plusMinus = userData.plusMinus;
-        users[this.user] = this;
+        users[this.username] = this;
     };
 
     User.prototype.getWaitingRoom = function (){
@@ -28,7 +28,7 @@ function run(){
             if(users[user].waitingRoom && user != this.user){
                 console.log("in if");
                 waitingRoom[user] = {};
-                waitingRoom[user].user = users[user].user;
+                waitingRoom[user].username = users[user].username;
                 waitingRoom[user].wins = users[user].wins;
                 waitingRoom[user].losses = users[user].losses;
                 waitingRoom[user].points = users[user].points;
@@ -42,7 +42,7 @@ function run(){
     User.prototype.joinWaitingRoom = function () {
         this.waitingRoom = true;
         this.socket.broadcast.emit('newOpponent',{
-            user:this.user,
+            username:this.username,
             wins:this.wins,
             losses: this.losses,
             points: this.points,
@@ -51,7 +51,7 @@ function run(){
     };
 
     function userDefaults (login){
-        return{ user: login.user,
+        return{ username: login.username,
                 password: login.password,
                 wins:0,
                 losses:0,
@@ -63,7 +63,7 @@ function run(){
     funcs = {
         login : function (login, socket, callback){
             console.log("in userFuncs.login");
-            db.users.find({user: login.user}, function(err, users) {
+            db.users.find({username: login.username}, function(err, users) {
                 console.log("err ", err);
                 console.log("users ", users);
                 if( err || !users.length){ db.users.save(userDefaults(login), function(err, saved) {
@@ -87,11 +87,11 @@ function run(){
                 }
             });
         },
-        sendWaitingRoom: function (user){
-            users[user].getWaitingRoom();
+        sendWaitingRoom: function (username){
+            users[username].getWaitingRoom();
         },
-        joinWaitingRoom: function (user){
-            users[user].joinWaitingRoom();
+        joinWaitingRoom: function (username){
+            users[username].joinWaitingRoom();
         }
 
     };

@@ -1,5 +1,5 @@
 var users = require('./users');
-var setExpress = require('./server/setExpress');
+var setExpress = require('./setExpress');
 
 
 var io = require('socket.io'),
@@ -25,7 +25,7 @@ io.sockets.on('connection', function (socket) {
             if(status.success && status.newAccount){
                 socket.emit("newAccount");
             } else if(status.success){
-                socket.user = msgData.user;
+                socket.username = msgData.username;
                 socket.emit("loggedIn");
             }else{
                 socket.emit("badPassword");
@@ -33,16 +33,16 @@ io.sockets.on('connection', function (socket) {
         });
     });
 
-    socket.on('getWaitingRoom', function(user){
-        usersFuncs.sendWaitingRoom(user);
+    socket.on('getWaitingRoom', function(username){
+        usersFuncs.sendWaitingRoom(username);
     });
 
-    socket.on('challenge', function(user){
-        console.log('the doomed:',user);
+    socket.on('challenge', function(username){
+        console.log('the doomed:', username);
     });
 
     socket.on('joinWaitingRoom', function(){
-        usersFuncs.joinWaitingRoom(socket.user);
-        console.log('socket.user', socket.user);
+        usersFuncs.joinWaitingRoom(socket.username);
+        console.log('socket.username', socket.username);
     });
 });

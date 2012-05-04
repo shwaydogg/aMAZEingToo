@@ -55,9 +55,10 @@ var LoginView = Backbone.View.extend({
         "click #login": "login"
     },
     login: function(e){
-        var user= this.model.get('username');
+        var username = this.model.get('username');
         var password = this.model.get('password');
-        socket.emit("login",{user:user, password: password});
+        socket.emit("login",{username:username, password: password});
+        this.model.set({'password':null});
         return false;
     }
 });
@@ -102,7 +103,7 @@ var OpponentView = Backbone.View.extend({
     },
     challenge: function (){
         console.log(this.model);
-        socket.emit('challenge',this.model.get('user'));
+        socket.emit('challenge',this.model.get('username'));
     }
 });
 
