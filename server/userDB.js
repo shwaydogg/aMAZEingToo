@@ -5,7 +5,7 @@ function run (){
     var db = require("mongojs").connect(databaseUrl, collections);
 
 
-    loginDB = function loginDB (login, defaults, callback){
+    loginDB = function (login, defaults, callback){
         var user;
         console.log("in userFuncs.login");
         db.users.find({username: login.username}, function(err, users) {

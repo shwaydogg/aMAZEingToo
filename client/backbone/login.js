@@ -130,6 +130,10 @@ var WaitingRoomView = Backbone.View.extend({
             self.addOpponent(msgData);
         });
 
+        socket.on('inMatch', function (){
+            app_router.navigate("game", {trigger: true, replace: true});
+        });
+
         socket.emit('getWaitingRoom', app_router.loginView.model.get('username') );
         this.render();
     },

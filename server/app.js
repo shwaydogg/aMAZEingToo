@@ -1,4 +1,5 @@
 var users = require('./users');
+var match = require('./match.js');
 var setExpress = require('./setExpress');
 
 
@@ -14,6 +15,7 @@ app.use(express.bodyParser());
 app.listen(8080);
 
 users.run();
+match.run();
 setExpress.setUp(app);
 
 

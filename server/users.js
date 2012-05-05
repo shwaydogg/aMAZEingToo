@@ -51,6 +51,7 @@ function run (){
 
         this.socket.on('challenge', function(username){
             console.log('the doomed:', self.username);
+            self.startMatch(username);
         });
 
     };
@@ -94,6 +95,20 @@ function run (){
                 plusMinus: 0 //like in hockey, point differential
                };
     }
+
+    User.prototype.startMatch = function (challenged){
+        if(this.inMatch){
+            this.socket.emit('you are already in a game');
+        }
+        else if (users[challenged].inMatch){
+            this.socket.emit('they are already in a game');
+        }
+        else{
+            this.inMatch = true;
+            users[challenged].inMatch = true;
+            new Match(this, users[challenged]);
+        }
+    };
 }
 
 exports.run = run;
