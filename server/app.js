@@ -13,7 +13,7 @@ app.use(express.bodyParser());
 
 app.listen(8080);
 
-usersFuncs= users.run();
+users.run();
 setExpress.setUp(app);
 
 
