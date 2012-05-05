@@ -62,6 +62,7 @@ function run(){
 
     funcs = {
         login : function (login, socket, callback){
+            var user;
             console.log("in userFuncs.login");
             db.users.find({username: login.username}, function(err, users) {
                 console.log("err ", err);
@@ -71,29 +72,22 @@ function run(){
                             callback({success:false, error:"failed: user not found, attempted but failed to save the new user"});
                         }
                         else {
-                            new User(userDefaults(login),socket);
-                            callback({success:true, newUser:true});
+                            user = new User(userDefaults(login),socket);
+                            callback({success:true, newUser:true, user:user});
                         }
                     });
                 }
                 else {
                     if(users[0].password == login.password){
-                        new User(users[0],socket);
-                        callback({success: true});
+                        user = new User(users[0],socket);
+                        callback({success: true, user:user});
                     }
                     else{
                         callback({success:false, error: "badPassword"});
                     }
                 }
             });
-        },
-        sendWaitingRoom: function (username){
-            users[username].getWaitingRoom();
-        },
-        joinWaitingRoom: function (username){
-            users[username].joinWaitingRoom();
         }
-
     };
 
     return funcs;
