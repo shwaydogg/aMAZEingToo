@@ -10,14 +10,81 @@ function run(){
 
     var users = {};
 
-    User = function (userData, socket){
+    function loginDB (login, defaults, callback){
+        var user;
+        console.log("in userFuncs.login");
+        db.users.find({username: login.username}, function(err, users) {
+            console.log("err ", err);
+            console.log("users ", users);
+            if( err || !users.length){
+                db.users.save(defaults, function(err, saved) {
+                    if( err || !saved ){
+                        callback({success:false, error:"failed: user not found, attempted but failed to save the new user"});
+                    }
+                    else {
+                        callback({success:true, newUser:true, userData:defaults});
+                    }
+                });
+            }
+            else {
+                if(users[0].password == login.password){
+                    callback({success: true, userData:users[0]});
+                }
+                else{
+                    callback({success:false, error: "badPassword"});
+                }
+            }
+        });
+    }
+
+    User = function(socket){
         this.socket = socket;
+        this.login();
+        this.socket.on('login', function(msgData){});
+    };
+
+    User.prototype.login = function (){
+        var self = this;
+
+        self.socket.on('login', function(credentials){
+            console.log("msgData",credentials);
+            loginDB(credentials, userDefaults(credentials), function(status){
+                if(status.success){
+                    self.postLogin(status.userData);
+                    if(status.newAccount){
+                        self.socket.emit("newAccount");
+                    } else{
+                        self.socket.emit("loggedIn");
+                    }
+                }else{
+                    self.socket.emit("badPassword");
+                }
+            });
+        });
+    };
+
+    User.prototype.postLogin = function (userData){
+        var self = this;
         this.username = userData.username;
         this.wins = userData.wins;
         this.losses = userData.losses;
         this.points = userData.points;
         this.plusMinus = userData.plusMinus;
         users[this.username] = this;
+
+        this.socket.on('getWaitingRoom', function(username){
+            self.getWaitingRoom();
+        });
+
+        this.socket.on('joinWaitingRoom', function(){
+            self.joinWaitingRoom();
+            console.log('socket.username', self.socket.username);
+        });
+
+        this.socket.on('challenge', function(username){
+            console.log('the doomed:', self.username);
+        });
+
     };
 
     User.prototype.getWaitingRoom = function (){
@@ -59,38 +126,6 @@ function run(){
                 plusMinus: 0 //like in hockey, point differential
                };
     }
-
-    funcs = {
-        login : function (login, socket, callback){
-            var user;
-            console.log("in userFuncs.login");
-            db.users.find({username: login.username}, function(err, users) {
-                console.log("err ", err);
-                console.log("users ", users);
-                if( err || !users.length){ db.users.save(userDefaults(login), function(err, saved) {
-                        if( err || !saved ){
-                            callback({success:false, error:"failed: user not found, attempted but failed to save the new user"});
-                        }
-                        else {
-                            user = new User(userDefaults(login),socket);
-                            callback({success:true, newUser:true, user:user});
-                        }
-                    });
-                }
-                else {
-                    if(users[0].password == login.password){
-                        user = new User(users[0],socket);
-                        callback({success: true, user:user});
-                    }
-                    else{
-                        callback({success:false, error: "badPassword"});
-                    }
-                }
-            });
-        }
-    };
-
-    return funcs;
 }
 
 exports.run = run;
