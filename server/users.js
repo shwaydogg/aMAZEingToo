@@ -56,22 +56,24 @@ function run (){
 
     };
 
+    User.prototype.history = function (){
+        return {
+                    username:this.username,
+                    wins : this.wins,
+                    losses : this.losses,
+                    points : this.points,
+                    plusMinus : this.plusMinus
+                };
+    };
+
     User.prototype.getWaitingRoom = function (){
         var waitingRoom = {};
         for(var user in users){
             //if user is in the waiting room and is not the current user:
-            console.log('users[user]',users[user]);
             if(users[user].waitingRoom && user != this.user){
-                console.log("in if");
-                waitingRoom[user] = {};
-                waitingRoom[user].username = users[user].username;
-                waitingRoom[user].wins = users[user].wins;
-                waitingRoom[user].losses = users[user].losses;
-                waitingRoom[user].points = users[user].points;
-                waitingRoom[user].plusMinus = users[user].plusMinus;
+                waitingRoom[user] = users[user].history();
             }
         }
-        console.log("WR",waitingRoom);
         this.socket.emit("waitingRoom", waitingRoom);
     };
 

@@ -47,7 +47,7 @@ var LoginView = Backbone.View.extend({
         else{
             $(this.el).html( 'Congrats on logging in!' );
             setTimeout(function (){
-                app_router.navigate("waitingroom", {trigger: true, replace: true});
+                appRouter.navigate("waitingroom", {trigger: true, replace: true});
             },500);
         }
     },
@@ -130,11 +130,7 @@ var WaitingRoomView = Backbone.View.extend({
             self.addOpponent(msgData);
         });
 
-        socket.on('inMatch', function (){
-            app_router.navigate("game", {trigger: true, replace: true});
-        });
-
-        socket.emit('getWaitingRoom', app_router.loginView.model.get('username') );
+        socket.emit('getWaitingRoom', appRouter.loginView.model.get('username') );
         this.render();
     },
     render: function (){

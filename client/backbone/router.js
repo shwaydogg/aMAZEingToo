@@ -16,12 +16,12 @@ var AppRouter = Backbone.Router.extend({
     },
 
     game: function (query, page) {
-        var mainGameView = new MainGameView();
     }
 
 });
 
 // Instantiate the router
-    var app_router = new AppRouter();
+    var appRouter = new AppRouter();
+    appRouter.mainGameView = new MainGameView();
     // Start Backbone history a neccesary step for bookmarkable URL's
     Backbone.history.start();

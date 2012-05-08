@@ -1,57 +1,59 @@
 var Game = Backbone.Model.extend({
     initialize: function(params){
-        this.points = {pathFinder: 0, mazeMaker: 0};
-        this.mazePath = [];
-        this.trailPath = [];
-        //this.playerType = params.playerType; //'mazeMaker', 'pathFinder', 'watcher'
-        //this.inputMode;
-        this.set({gameNumber: 1});
     },
     defaults:{
-        inputMode : "dragOnClick"
     }
 });
 
 var MainGameView  = Backbone.Model.extend({
     el: $("#main"),
     initialize: function(){
+
+        var self = this;
+
+        socket.on('initGame', function (msgData){
+            self.render();
+            var game = new Game(msgData);
+            appRouter.mainGameView = new GameView({model: new Game(msgData)});
+        });
+
+    },
+    render: function (){
         $(this.el).html( $('#tpl_MainGameView').html() );
 
-        //create game model and view:
-        var game  = new Game({player1UserName:'greg',player2UserName:"Scott", player1Points: 0, player2Points: 0, playerType:'pathFinder'});
-        var gameView = new GameView({model:game});
-
-        //this line is temporary: jsut for testing.  Later this will happen via a response to sockets.
-        game.set({player1UserName:'greg',player2UserName:"Scott", player1Points: 0, player2Points: 0, playerType:'pathFinder'});
-        //this was also just for testing purposes
-        setTimeout(function(){
-          game.set({player1UserName:'Mustachio', player1Points: 9999999, playerType:"mazeMaker"});
-        },3000);
-
-        //create sub views:
-        var notificationView = new NotificationView({model:game, el:"#gameNotifications"});
-        var scoreBoardView = new ScoreBoardView({model:game, el:"#gameScoreBoard"});
-        var buttonview = new ButtonView({model:game, el:'#gameButtons'});
-
-        notificationView.render();
     }
 });
 
 var GameView = Backbone.View.extend({
-    //model: Game, // this seems to not be the common way to bind model and view
     el: $("#gameContainer"),
     initialize: function(){
+        var self = this;
         _.bindAll(this, 'render'); // every function that uses 'this' as the current object should be in here
         this.model.bind('change', this.render);
         this.canvas = new Canvas(700,400);
         this.tracker = new MouseTracks('gameContainer');
         this.canvas.addToDom('gameContainer');
+        socket.on('drawLine', function (msgData){
+            console.log('drawLine', msgData);
+            self.canvas.drawLine(msgData.line.x1, msgData.line.y1, msgData.line.x2, msgData.line.y2);
+        });
+
+        var notificationView = new NotificationView({model:this.model, el:"#gameNotifications"});
+        var scoreBoardView = new ScoreBoardView({model:this.model, el:"#gameScoreBoard"});
+        var buttonview = new ButtonView({model:this.model, el:'#gameButtons'});
+        notificationView.render();
+
+        if(this.model.get('playerType') == 'mazeMaker'){
+            this.model.set({inputMode: 'line'});
+        }else if(this.model.get('playerType') == 'pathFinder'){
+            this.model.set({inputMode: 'drag'});
+        }
+
     },
     render: function(){
         var self = this;
         this.reportLine = function(line){
-            //console.log('cLine:',line);
-            self.canvas.drawLine(line.x1,line.y1,line.x2,line.y2);
+            socket.emit('sendLine',{line: {x1: line.x1, y1:line.y1, x2: line.x2, y2: line.y2}});
         };
         if (this.model.attributes.deInit)
             this.model.attributes.deInit();
@@ -116,7 +118,6 @@ var ButtonView = Backbone.View.extend({
             template = '<button id="giveUp">Give Up!?!</button>';
 
         } else{
-            //wat
             template = "No buttons for those watching";
         }
         $(this.el).html(template);

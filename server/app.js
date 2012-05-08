@@ -15,7 +15,7 @@ app.use(express.bodyParser());
 app.listen(8080);
 
 users.run();
-match.run();
+match.run(io);
 setExpress.setUp(app);
 
 
