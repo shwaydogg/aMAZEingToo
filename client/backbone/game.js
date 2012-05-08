@@ -38,9 +38,9 @@ var GameView = Backbone.View.extend({
             self.canvas.drawLine(msgData.line.x1, msgData.line.y1, msgData.line.x2, msgData.line.y2);
         });
 
-        var notificationView = new NotificationView({model:this.model, el:"#gameNotifications"});
-        var scoreBoardView = new ScoreBoardView({model:this.model, el:"#gameScoreBoard"});
-        var buttonview = new ButtonView({model:this.model, el:'#gameButtons'});
+        var notificationView = new NotificationView({model:this.model});
+        var scoreBoardView = new ScoreBoardView({model:this.model});
+        var buttonview = new ButtonView({model:this.model});
         notificationView.render();
 
         if(this.model.get('playerType') == 'mazeMaker'){
@@ -63,6 +63,7 @@ var GameView = Backbone.View.extend({
 });
 
 var NotificationView = Backbone.View.extend({
+    el:"#gameNotifications",
     initialize: function(){
         _.bindAll(this, 'render'); // every function that uses 'this' as the current object should be in here
       this.model.bind('change', this.render);
@@ -75,6 +76,7 @@ var NotificationView = Backbone.View.extend({
     }
 });
 var ScoreBoardView = Backbone.View.extend({
+    el:"#gameScoreBoard",
     initialize: function(){
         _.bindAll(this, 'render'); // every function that uses 'this' as the current object should be in here
         this.model.bind('change', this.render);
@@ -88,6 +90,7 @@ var ScoreBoardView = Backbone.View.extend({
 });
 
 var ButtonView = Backbone.View.extend({
+    el:'#gameButtons',
     initialize: function(){
         _.bindAll(this, 'render', 'setLineMode', 'setDragMode', 'giveUp'); // every function that uses 'this' as the current object should be in here
         this.model.bind('change', this.render);
