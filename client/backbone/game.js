@@ -13,7 +13,7 @@ var MainGameView  = Backbone.Model.extend({
 
         socket.on('initGame', function (msgData){
             self.render();
-            var game = new Game(msgData);
+            console.log(msgData);
             appRouter.mainGameView = new GameView({model: new Game(msgData)});
         });
 
@@ -33,9 +33,19 @@ var GameView = Backbone.View.extend({
         this.canvas = new Canvas(700,400);
         this.tracker = new MouseTracks('gameContainer');
         this.canvas.addToDom('gameContainer');
+
         socket.on('drawLine', function (msgData){
-            console.log('drawLine', msgData);
-            self.canvas.drawLine(msgData.line.x1, msgData.line.y1, msgData.line.x2, msgData.line.y2);
+            //console.log('drawLine', msgData);
+            var lineColor = 'black';
+
+            if(msgData.gameNumber != self.model.get('gameNumber'))
+                return;
+
+            if(msgData.type == 'path')
+                lineColor = 'red';
+
+            self.canvas.drawLine(msgData.line.x1, msgData.line.y1, msgData.line.x2, msgData.line.y2, lineColor);
+            
         });
 
         var notificationView = new NotificationView({model:this.model});
@@ -53,7 +63,7 @@ var GameView = Backbone.View.extend({
     render: function(){
         var self = this;
         this.reportLine = function(line){
-            socket.emit('sendLine',{line: {x1: line.x1, y1:line.y1, x2: line.x2, y2: line.y2}});
+            socket.emit('sendLine',{gameNumber: self.model.get('gameNumber'), line: {x1: line.x1, y1:line.y1, x2: line.x2, y2: line.y2}});
         };
         if (this.model.attributes.deInit)
             this.model.attributes.deInit();
@@ -70,7 +80,7 @@ var NotificationView = Backbone.View.extend({
       this.render();
     },
     render: function() {
-        var template = '<h2>Match: {{player1UserName}} VS. {{player2UserName}}</h2> <h3>Game: {{gameNumber}} / 4 </h3> <h3>State: {{playerType}}</h3> ';
+        var template = '<h2>Match: {{you.username}} VS. {{opponent.username}}</h2> <h3>Game: {{gameNumber}} / 4 </h3> <h3>State: {{playerType}}</h3> ';
         $(this.el).html(Mustache.to_html(template, this.model.toJSON()));
         return this;
     }
@@ -83,7 +93,7 @@ var ScoreBoardView = Backbone.View.extend({
         this.render();
     },
     render: function() {
-        var template = '<h3>Match: {{player1UserName}} {{player2UserName}}</h3><h2>{{player1Points}} {{player2Points}}</h2>';
+        var template = '<h3>Match: {{you.username}} {{opponent.username}}</h3><h2>{{player1Points}} {{player2Points}}</h2>';
         $(this.el).html(Mustache.to_html(template, this.model.toJSON()));
         return this;
     }
@@ -106,7 +116,6 @@ var ButtonView = Backbone.View.extend({
     },
     setDragMode: function() {
         this.model.set({inputMode: 'dragOnClick'});
-        console.log("sooooo you want to drag lines eh?");
     },
     giveUp: function() {
         console.log("GIVE UP!!!!!!!!!!!!!???????????????");
