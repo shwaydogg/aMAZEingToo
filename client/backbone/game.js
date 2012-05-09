@@ -35,17 +35,21 @@ var GameView = Backbone.View.extend({
         this.canvas.addToDom('gameContainer');
 
         socket.on('drawLine', function (msgData){
-            //console.log('drawLine', msgData);
+            console.log('drawLine', msgData);
             var lineColor = 'black';
 
             if(msgData.gameNumber != self.model.get('gameNumber'))
                 return;
 
-            if(msgData.type == 'path')
+            if(msgData.type == 'trail')
                 lineColor = 'red';
 
             self.canvas.drawLine(msgData.line.x1, msgData.line.y1, msgData.line.x2, msgData.line.y2, lineColor);
             
+        });
+
+        socket.on('collision', function (msgData){
+            console.log("collision msgData:", msgData)
         });
 
         var notificationView = new NotificationView({model:this.model});
@@ -63,6 +67,7 @@ var GameView = Backbone.View.extend({
     render: function(){
         var self = this;
         this.reportLine = function(line){
+            console.log('reportLine', line)
             socket.emit('sendLine',{gameNumber: self.model.get('gameNumber'), line: {x1: line.x1, y1:line.y1, x2: line.x2, y2: line.y2}});
         };
         if (this.model.attributes.deInit)
