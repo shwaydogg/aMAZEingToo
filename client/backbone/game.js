@@ -30,12 +30,12 @@ var GameView = Backbone.View.extend({
         var self = this;
         _.bindAll(this, 'render'); // every function that uses 'this' as the current object should be in here
         this.model.bind('change', this.render);
-        this.canvas = new Canvas(700,400);
+        this.canvas = new Canvas(this.model.get('canvas').width,this.model.get('canvas').height);
         this.tracker = new MouseTracks('gameContainer');
         this.canvas.addToDom('gameContainer');
 
         socket.on('drawLine', function (msgData){
-            console.log('drawLine', msgData);
+            //console.log('drawLine', msgData);
             var lineColor = 'black';
 
             if(msgData.gameNumber != self.model.get('gameNumber'))
@@ -49,7 +49,7 @@ var GameView = Backbone.View.extend({
         });
 
         socket.on('collision', function (msgData){
-            console.log("collision msgData:", msgData)
+            console.log("collision msgData:", msgData);
         });
 
         var notificationView = new NotificationView({model:this.model});
@@ -67,7 +67,7 @@ var GameView = Backbone.View.extend({
     render: function(){
         var self = this;
         this.reportLine = function(line){
-            console.log('reportLine', line)
+            //console.log('reportLine', line)
             socket.emit('sendLine',{gameNumber: self.model.get('gameNumber'), line: {x1: line.x1, y1:line.y1, x2: line.x2, y2: line.y2}});
         };
         if (this.model.attributes.deInit)

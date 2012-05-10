@@ -6,6 +6,9 @@ function run (io){
         var self = this;
         this.user1 = user1;
         this.user2 = user2;
+        this.canvas = {};
+        this.canvas.width = 700;
+        this.canvas.height = 400;
 
         this.gameNumber = 0;
         this.game = {};
@@ -16,6 +19,7 @@ function run (io){
 
 
     Match.prototype.nextGame = function (){
+        var self = this;
         this.gameNumber++;
         this.currentGame = this.game[this.gameNumber];
 
@@ -46,14 +50,17 @@ function run (io){
             playerType: this.user1.playerType,
             gameNumber: this.gameNumber,
             you: this.user1.history(),
-            opponent: this.user2.history()
+            opponent: this.user2.history(),
+            canvas: self.canvas
         });
 
         this.user2.socket.emit('initGame', {
             playerType: this.user2.playerType,
             gameNumber: this.gameNumber,
             you: this.user2.history(),
-            opponent: this.user1.history()
+            opponent: this.user1.history(),
+            canvas: self.canvas
+
         });
 
         this.listen(this.user1);
@@ -74,7 +81,7 @@ function run (io){
 
         user.socket.on('sendLine', function (msgData){
             var pointA = lastValidPoint || {x:msgData.line.x1 , y:msgData.line.y1},
-                pointB = {x:msgData.line.x2 , y:msgData.line.y2, endLine: msgData.endLine};
+                pointB = {x:msgData.line.x2 , y:msgData.line.y2};
 
             //console.log('senLine:msgData:', msgData);
 
@@ -87,7 +94,7 @@ function run (io){
                 if (!lastValidPoint){
                     addToPath.push(pointA);
                 }
-                pointB.end = true;
+                pointB.end = (lineType == 'maze')? true : false;
                 addToPath.push(pointB);
                 lastValidPoint = (lineType == 'trail')? pointB : null;
             }
