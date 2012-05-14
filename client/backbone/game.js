@@ -14,7 +14,8 @@ var MainGameView  = Backbone.Model.extend({
         socket.on('initGame', function (msgData){
             self.render();
             console.log(msgData);
-            appRouter.mainGameView = new GameView({model: new Game(msgData)});
+            var gameView = new GameView({model: new Game(msgData)});
+            self.set({gameView: gameView});
         });
 
     },
@@ -28,7 +29,7 @@ var GameView = Backbone.View.extend({
     el: $("#gameContainer"),
     initialize: function(){
         var self = this;
-        _.bindAll(this, 'render'); // every function that uses 'this' as the current object should be in here
+        _.bindAll(this, 'render', 'reportLine'); // every function that uses 'this' as the current object should be in here
         this.model.bind('change', this.render);
         this.canvas = new Canvas(this.model.get('canvas').width,this.model.get('canvas').height);
         this.tracker = new MouseTracks('gameContainer');
@@ -48,6 +49,14 @@ var GameView = Backbone.View.extend({
             
         });
 
+        socket.on('mazeComplete', function (msgData){
+            console.log("mazeComplete");
+            //var deInit = self.model.get('deInit');
+            var deInit = self.model.attributes.deInit;
+            deInit();
+        });
+
+
         socket.on('collision', function (msgData){
             console.log("collision msgData:", msgData);
         });
@@ -64,16 +73,17 @@ var GameView = Backbone.View.extend({
         }
 
     },
+    reportLine: function (line){
+        socket.emit('sendLine',{gameNumber: this.model.get('gameNumber'), line: {x1: line.x1, y1:line.y1, x2: line.x2, y2: line.y2}});
+    },
     render: function(){
         var self = this;
-        this.reportLine = function(line){
-            //console.log('reportLine', line)
-            socket.emit('sendLine',{gameNumber: self.model.get('gameNumber'), line: {x1: line.x1, y1:line.y1, x2: line.x2, y2: line.y2}});
-        };
         if (this.model.attributes.deInit)
             this.model.attributes.deInit();
+
         var deInit = this.tracker.initMode(this.model.attributes.inputMode, this.reportLine);
-        this.model.attributes.deInit =deInit; // save deInit mouse function for later use.  Using set on the model would result in an inifinite loop.
+        this.model.attributes.deInit =deInit; // save deInit mouse function for later use.  Using set on the model wou
+        //Why does this crash browser? : // this.model.set({deInit: deInit}); // save deInit mouse function for later use.  Using set on the model would result in an inifinite loop.
     }
 });
 

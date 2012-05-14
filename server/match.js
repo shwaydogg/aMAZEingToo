@@ -6,29 +6,43 @@ function run (io){
         var self = this;
         this.user1 = user1;
         this.user2 = user2;
+
         this.canvas = {};
         this.canvas.width = 700;
         this.canvas.height = 400;
+        this.doorSize = 10;//entrance and exit square size.
 
         this.gameNumber = 0;
-        this.game = {};
-        this.game[1] = {mazePath:[],trailPath:[], points1:0, points2:0};
+        this.game = [];
+
 
         this.nextGame();
+    };
+
+    Match.prototype.checkExit = function (point){
+        if (point.x >=this.canvas.width - this.doorSize  &&
+            point.y >= this.canvas.height - this.doorSize)
+            return true;
+        else
+            return false;
     };
 
 
     Match.prototype.nextGame = function (){
         var self = this;
         this.gameNumber++;
+        this.game[this.gameNumber] = {mazePath:[],trailPath:[], points1:0, points2:0};
         this.currentGame = this.game[this.gameNumber];
+
+        console.log("currentGame: ", this.currentGame);
+
 
         if (this.gameNumber == 1){
             this.user1.playerType = 'mazeMaker';
             this.user2.playerType = 'pathFinder';
         }
         else if (this.gameNumber == 2){
-            this.currentGame = this.game[1].mazePath;
+            this.currentGame.mazePath = this.game[1].mazePath;
             this.user1.playerType = 'pathFinder';
             this.user2.playerType = 'watcher';
         }
@@ -37,7 +51,7 @@ function run (io){
             this.user2.playerType = 'mazeMaker';
         }
         else if (this.gameNumber == 4){
-            this.currentGame = this.game[3].mazePath;
+            this.currentGame.mazePath = this.game[3].mazePath;
             this.user1.playerType = 'watcher';
             this.user2.playerType = 'pathFinder';
         }
@@ -71,32 +85,52 @@ function run (io){
 
     Match.prototype.listen = function (user){
         var self = this,
-            lineType = (user.playerType == 'pathFinder')? 'trail' : 'maze',
-            collisionPath = (lineType == 'maze')? this.currentGame.trailPath : this.currentGame.mazePath,
-            addToPath =  (lineType == 'trail')? this.currentGame.trailPath : this.currentGame.mazePath,
-            lastValidPoint = null;
+            gameNumber = this.gameNumber,
+            lineType, collisionPath, currentPath, lastValidPoint = null;
 
-            //console.log("lineType:", lineType, " collisionPath:", collisionPath, ' addToPath:', addToPath);
+        if (user.playerType == 'pathFinder'){
+            lineType = 'trail';
+            collisionPath = this.currentGame.mazePath;
+            currentPath =  this.currentGame.trailPath;
+            lastValidPoint = {x:0, y:0};
+        }else{
+            lineType = 'maze';
+            collisionPath = this.currentGame.trailPath;
+            currentPath =  this.currentGame.mazePath;
+        }
+
+        console.log("lineType:", lineType, " collisionPath:", collisionPath, ' currentPath:', currentPath);
 
 
         user.socket.on('sendLine', function (msgData){
             var pointA = lastValidPoint || {x:msgData.line.x1 , y:msgData.line.y1},
                 pointB = {x:msgData.line.x2 , y:msgData.line.y2};
 
-            //console.log('senLine:msgData:', msgData);
+            //console.log('sendLine:msgData:', msgData);
+            // console.log('lineType', lineType);
 
-            if(msgData.gameNumber != self.gameNumber){
+            // if(self.gameNumber == 2 && lineType == 'maze'){
+            //     return;
+            // }
+
+            if(gameNumber != self.gameNumber ||
+                msgData.gameNumber != self.gameNumber){
                 return;
             }
 
             if( !collision.lineCollide(pointA, pointB, collisionPath)){
                 self.drawLine(pointA, pointB, msgData.gameNumber, lineType );
                 if (!lastValidPoint){
-                    addToPath.push(pointA);
+                    currentPath.push(pointA);
                 }
                 pointB.end = (lineType == 'maze')? true : false;
-                addToPath.push(pointB);
+                currentPath.push(pointB);
                 lastValidPoint = (lineType == 'trail')? pointB : null;
+                if (lineType == 'trail' && self.checkExit(pointB)){
+                    io.sockets.in(this.room).emit('mazeComplete');
+                    self.nextGame();
+                    //return;
+                }
             }
             else{
                 //console.log('collision detected');
