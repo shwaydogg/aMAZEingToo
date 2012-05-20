@@ -10,12 +10,13 @@ var MainGameView  = Backbone.Model.extend({
     initialize: function(){
 
         var self = this;
+        var gameView;
+        this.set({gameView: gameView});
 
         socket.on('initGame', function (msgData){
             self.render();
             console.log(msgData);
-            var gameView = new GameView({model: new Game(msgData)});
-            self.set({gameView: gameView});
+            gameView = new GameView({model: new Game(msgData)});
         });
 
     },
@@ -26,10 +27,10 @@ var MainGameView  = Backbone.Model.extend({
 });
 
 var GameView = Backbone.View.extend({
-    el: $("#gameContainer"),
+    el: "#gameContainer",
     initialize: function(){
         var self = this;
-        _.bindAll(this, 'render', 'reportLine'); // every function that uses 'this' as the current object should be in here
+        _.bindAll(this, 'render', 'reportLine', 'pathFinderWait', 'pathFinderBlock'); // every function that uses 'this' as the current object should be in here
         this.model.bind('change', this.render);
         this.canvas = new Canvas(this.model.get('canvas').width,this.model.get('canvas').height);
         this.tracker = new MouseTracks('gameContainer');
@@ -38,22 +39,22 @@ var GameView = Backbone.View.extend({
         socket.on('drawLine', function (msgData){
             //console.log('drawLine', msgData);
             var lineColor = 'black';
-
             if(msgData.gameNumber != self.model.get('gameNumber'))
                 return;
-
             if(msgData.type == 'trail')
                 lineColor = 'red';
-
             self.canvas.drawLine(msgData.line.x1, msgData.line.y1, msgData.line.x2, msgData.line.y2, lineColor);
-            
         });
 
         socket.on('mazeComplete', function (msgData){
             console.log("mazeComplete");
             //var deInit = self.model.get('deInit');
             var deInit = self.model.attributes.deInit;
-            deInit();
+            if(deInit){
+                deInit();
+            }else{
+                console.log('deInit not defined');
+            }
         });
 
 
@@ -77,13 +78,34 @@ var GameView = Backbone.View.extend({
         socket.emit('sendLine',{gameNumber: this.model.get('gameNumber'), line: {x1: line.x1, y1:line.y1, x2: line.x2, y2: line.y2}});
     },
     render: function(){
-        var self = this;
+        var self = this,
+            mouseDelay = 0;
         if (this.model.attributes.deInit)
             this.model.attributes.deInit();
 
-        var deInit = this.tracker.initMode(this.model.attributes.inputMode, this.reportLine);
-        this.model.attributes.deInit =deInit; // save deInit mouse function for later use.  Using set on the model wou
-        //Why does this crash browser? : // this.model.set({deInit: deInit}); // save deInit mouse function for later use.  Using set on the model would result in an inifinite loop.
+        if( this.model.get('playerType') == 'pathFinder'){
+            mouseDelay = 2;
+            this.pathFinderWait();
+        }
+
+        setTimeout(function (){
+            self.pathFinderStopWait();
+            var deInit = self.tracker.initMode(self.model.attributes.inputMode, self.reportLine);
+            self.model.attributes.deInit =deInit; // save deInit mouse function for later use.  Using set on the model wou
+            //Why does this crash browser? : // this.model.set({deInit: deInit}); // save deInit mouse function for later use.  Using set on the model would result in an inifinite loop.
+        }, mouseDelay * 1000 );
+           
+    },
+    pathFinderWait : function (){
+        var template = $('#tpl_pathFinderWait').html();
+        $(this.el).append(Mustache.to_html( template, this.model.toJSON() ));
+        //$(this.el).append($('#tpl_pathFinderWait').html());
+    },
+    pathFinderStopWait : function (){
+        $('.pathFinderWait').remove();
+    },
+    pathFinderBlock: function (){
+        //to be defined
     }
 });
 
