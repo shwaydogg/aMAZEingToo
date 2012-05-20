@@ -10,21 +10,25 @@
         <link rel="stylesheet" type="text/css" href="client/main.css" media="all">
     </head>
     <body>
-        <div id="main" class="clearfix"></div>
+        <div id="main"></div>
 
         <script type="text/template" id="tpl_MainGameView">
-            <div class="left clearfix">
+            <div class="board-piece">
                 <div id="gameNotifications"></div>
             </div>
 
-            <div id="gameContainer" class="clearfix"></div>
+            <div id="gameContainer" class="board-piece"></div>
 
-            <div class="right clearfix">
+            <div class="board-piece">
                 <div id="gameScoreBoard"></div>
                 <div id="gameButtons"></div>
             </div>
         </script>
 
+        <script type="text/template" id="tpl_pathFinderWait">
+            <div class="pathFinderWait" style="height:{{height}}px; width:{{width}}px;">WAIT A SECOND</div>
+        </script>
+            
         <script type="text/template" id="tpl_login">
             <div class="left clearfix"></div>
             <div id="loginContainer" class="clearfix"></div>
