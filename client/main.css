@@ -18,6 +18,7 @@ button#giveUp {
 	font-weight:800;
 }
 
+div.collision,
 div.pathFinderWait {
 
 	background-color: red;
@@ -29,4 +30,23 @@ div.pathFinderWait {
 	width:100%;
 	position: absolute;
 	top: 0;
+}
+
+div.collision {
+	overflow: hidden;
+	z-index:500;
+}
+
+div.leftBlock, div.topBlock, div.rightBlock, div.bottomBlock {
+	z-index: 750;
+	background-color:black;
+	display:none;
+}
+
+div.leftBlock, div.rightBlock {
+	height: 100%;
+}
+
+div.bottomBlock, div.topBlock {
+	width: 100%;
 }

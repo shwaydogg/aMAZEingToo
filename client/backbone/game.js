@@ -5,18 +5,16 @@ var Game = Backbone.Model.extend({
     }
 });
 
-var MainGameView  = Backbone.Model.extend({
+var MainGameView  = Backbone.View.extend({
     el: $("#main"),
     initialize: function(){
 
         var self = this;
-        var gameView;
-        this.set({gameView: gameView});
 
         socket.on('initGame', function (msgData){
             self.render();
             console.log(msgData);
-            gameView = new GameView({model: new Game(msgData)});
+            self.gameView = new GameView({model: new Game(msgData)});
         });
 
     },
@@ -30,19 +28,21 @@ var GameView = Backbone.View.extend({
     el: "#gameContainer",
     initialize: function(){
         var self = this;
-        _.bindAll(this, 'render', 'reportLine', 'pathFinderWait', 'pathFinderBlock'); // every function that uses 'this' as the current object should be in here
-        this.model.bind('change', this.render);
+        _.bindAll(this, 'reportLine'); // every function that uses 'this' as the current object should be in here
         this.canvas = new Canvas(this.model.get('canvas').width,this.model.get('canvas').height);
         this.tracker = new MouseTracks('gameContainer');
         this.canvas.addToDom('gameContainer');
 
+        //init sockets:
         socket.on('drawLine', function (msgData){
             //console.log('drawLine', msgData);
             var lineColor = 'black';
             if(msgData.gameNumber != self.model.get('gameNumber'))
                 return;
-            if(msgData.type == 'trail')
+            if(msgData.type == 'trail'){
                 lineColor = 'red';
+                self.model.set({'inCollision':false});
+            }
             self.canvas.drawLine(msgData.line.x1, msgData.line.y1, msgData.line.x2, msgData.line.y2, lineColor);
         });
 
@@ -60,24 +60,29 @@ var GameView = Backbone.View.extend({
 
         socket.on('collision', function (msgData){
             console.log("collision msgData:", msgData);
+            self.model.set({'inCollision':true});
         });
 
+        //init SubViews:
         var notificationView = new NotificationView({model:this.model});
         var scoreBoardView = new ScoreBoardView({model:this.model});
         var buttonview = new ButtonView({model:this.model});
         notificationView.render();
 
+        //set playerType:
         if(this.model.get('playerType') == 'mazeMaker'){
             this.model.set({inputMode: 'line'});
         }else if(this.model.get('playerType') == 'pathFinder'){
             this.model.set({inputMode: 'drag'});
         }
 
+        this.initMouse();
+
     },
     reportLine: function (line){
         socket.emit('sendLine',{gameNumber: this.model.get('gameNumber'), line: {x1: line.x1, y1:line.y1, x2: line.x2, y2: line.y2}});
     },
-    render: function(){
+    initMouse: function(){
         var self = this,
             mouseDelay = 0;
         if (this.model.attributes.deInit)
@@ -85,27 +90,67 @@ var GameView = Backbone.View.extend({
 
         if( this.model.get('playerType') == 'pathFinder'){
             mouseDelay = 2;
-            this.pathFinderWait();
+            this.model.set({pathFinderBlockView: new PathFinderBlockView({model:this.model})});
+            this.model.set({mazeDrawWait:true});
         }
 
         setTimeout(function (){
-            self.pathFinderStopWait();
+            self.model.set({mazeDrawWait: false});
             var deInit = self.tracker.initMode(self.model.attributes.inputMode, self.reportLine);
             self.model.attributes.deInit =deInit; // save deInit mouse function for later use.  Using set on the model wou
             //Why does this crash browser? : // this.model.set({deInit: deInit}); // save deInit mouse function for later use.  Using set on the model would result in an inifinite loop.
         }, mouseDelay * 1000 );
            
+    }
+
+});
+
+var PathFinderBlockView = Backbone.View.extend({
+    el: "#gameContainer",
+    initialize: function (){
+        // every function that uses 'this' as the current object should be in bindAll
+        _.bindAll(this, 'render', 'startWait', 'stopWait', 'initBlocks',
+            'inCollision', 'noCollision');
+        console.log(this);
+        this.model.bind('change', this.render);
+        this.startWait();
     },
-    pathFinderWait : function (){
+    render: function (){
+        if( this.model.hasChanged("mazeDrawWait")){
+            if(!this.model.get("mazeDrawWait")) {
+                this.stopWait();
+            }
+        }
+        if( this.model.hasChanged("inCollision")){
+            if(this.model.get("inCollision")) {
+                this.inCollision();
+            }
+            else{
+                this.noCollision();
+            }
+        }
+    },
+    startWait : function () {
         var template = $('#tpl_pathFinderWait').html();
         $(this.el).append(Mustache.to_html( template, this.model.toJSON() ));
-        //$(this.el).append($('#tpl_pathFinderWait').html());
     },
-    pathFinderStopWait : function (){
+    stopWait : function (){
         $('.pathFinderWait').remove();
     },
-    pathFinderBlock: function (){
+    initBlocks: function (){
         //to be defined
+        console.log('in PathFinderView.initBlocks i am not defined yet!');
+    },
+    inCollision: function (){
+        //to be defined
+        console.log('in  PathFinderView.inCollision i am not defined yet!');
+        var template = $('#tpl_collision').html();
+        $(this.el).append(Mustache.to_html( template, this.model.toJSON() ));
+    },
+    noCollision: function (){
+        //inverse of inCollision
+        console.log('in  PathFinderView.noCollision i am not defined yet!');
+        $('.collision').remove();
     }
 });
 
