@@ -40,6 +40,12 @@ var GameView = Backbone.View.extend({
             if(msgData.gameNumber != self.model.get('gameNumber'))
                 return;
             if(msgData.type == 'trail'){
+
+                if(self.model.get('playerType') == 'pathFinder'){
+                    console.log('setiing lastValidPoint');
+                    self.model.set({lastValidPoint:{x:msgData.line.x2, y:msgData.line.y2}});
+                }
+
                 lineColor = 'red';
                 self.model.set({'inCollision':false});
             }
@@ -109,17 +115,22 @@ var PathFinderBlockView = Backbone.View.extend({
     el: "#gameContainer",
     initialize: function (){
         // every function that uses 'this' as the current object should be in bindAll
-        _.bindAll(this, 'render', 'startWait', 'stopWait', 'initBlocks',
+        _.bindAll(this, 'render', 'startWait', 'stopWait', 'setBlocks',
             'inCollision', 'noCollision');
         console.log(this);
         this.model.bind('change', this.render);
         this.startWait();
+
+        $(this.el).append($('#tpl_pathFinderBlocks').html());
     },
     render: function (){
         if( this.model.hasChanged("mazeDrawWait")){
             if(!this.model.get("mazeDrawWait")) {
                 this.stopWait();
             }
+        }
+        if( this.model.hasChanged("lastValidPoint")){
+            this.setBlocks(this.model.get("lastValidPoint"));
         }
         if( this.model.hasChanged("inCollision")){
             if(this.model.get("inCollision")) {
@@ -137,19 +148,19 @@ var PathFinderBlockView = Backbone.View.extend({
     stopWait : function (){
         $('.pathFinderWait').remove();
     },
-    initBlocks: function (){
-        //to be defined
-        console.log('in PathFinderView.initBlocks i am not defined yet!');
+    setBlocks: function (point){
+        var radius = 20;
+        $(".leftBlock").width(point.x - radius);
+        $(".rightBlock").width( this.model.get('canvas').width - point.x - radius);
+        $(".topBlock").height(point.y - radius);
+        $(".bottomBlock").height( this.model.get('canvas').height - point.y - radius);
     },
     inCollision: function (){
-        //to be defined
-        console.log('in  PathFinderView.inCollision i am not defined yet!');
         var template = $('#tpl_collision').html();
         $(this.el).append(Mustache.to_html( template, this.model.toJSON() ));
     },
     noCollision: function (){
         //inverse of inCollision
-        console.log('in  PathFinderView.noCollision i am not defined yet!');
         $('.collision').remove();
     }
 });

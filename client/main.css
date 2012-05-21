@@ -3,6 +3,8 @@
 }
 #gameContainer {
 	position: relative;
+	cursor: crosshair;
+	border-style:solid;
 }
 
 .board-piece {
@@ -40,13 +42,28 @@ div.collision {
 div.leftBlock, div.topBlock, div.rightBlock, div.bottomBlock {
 	z-index: 750;
 	background-color:black;
-	display:none;
+	position: absolute;
 }
 
 div.leftBlock, div.rightBlock {
 	height: 100%;
+	top: 0;
 }
 
 div.bottomBlock, div.topBlock {
 	width: 100%;
+	left: 0;
+}
+
+div.leftBlock {
+	left:0;
+}
+div.rightBlock {
+	right:0;
+}
+div.topBlock{
+	top: 0;
+}
+div.bottomBlock{
+	bottom: 0;
 }
