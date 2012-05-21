@@ -93,6 +93,7 @@ function run (io){
             collisionPath = this.currentGame.mazePath;
             currentPath =  this.currentGame.trailPath;
             lastValidPoint = {x:0, y:0};
+            currentPath.push(lastValidPoint);
         }else{
             lineType = 'maze';
             collisionPath = this.currentGame.trailPath;
@@ -108,10 +109,6 @@ function run (io){
 
             //console.log('sendLine:msgData:', msgData);
             // console.log('lineType', lineType);
-
-            // if(self.gameNumber == 2 && lineType == 'maze'){
-            //     return;
-            // }
 
             if(gameNumber != self.gameNumber ||
                 msgData.gameNumber != self.gameNumber){
